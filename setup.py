@@ -38,7 +38,7 @@ DATA_FILES = [
 
 INSTALL_REQUIRES = [
     'Orange3',
-    'orangecontrib.timeseries',
+    'orange3-timeseries',
     'autogluon.timeseries',
 ]
 

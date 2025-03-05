@@ -5,6 +5,8 @@ from Orange.data import Table, Domain, ContinuousVariable, StringVariable
 from Orange.widgets import gui, settings
 from Orange.widgets.widget import Input, Output, Msg
 from Orange.widgets.visualize.owscatterplotgraph import OWScatterPlotBase
+from Orange.widgets.visualize.owscatterplotbase import OWScatterPlotBase
+from Orange.widgets.widget import OWWidget, Msg
 
 from orangecontrib.timeseries import Timeseries
 
@@ -22,7 +24,7 @@ class OWAutoGluonFeatureImportance(OWScatterPlotBase):
         feature_importance = Output("Feature importance", Table)
         selected_features = Output("Selected features", Table)
         
-    class Error(OWScatterPlotBase.Error):
+    class Error(OWWidget.Error):
         invalid_predictor = Msg("Input is not a valid AutoGluon predictor")
         computation_failed = Msg("Feature importance computation failed: {}")
     
