@@ -90,7 +90,9 @@ class OWAutoGluonLeaderboard(OWWidget):
             # Получаем таблицу лидеров
             if self.test_data is not None:
                 # Оцениваем на тестовых данных
-                leaderboard = self.predictor.predictor.leaderboard(self.test_data)
+                from orangecontrib.example.autogluon_integration import convert_to_autogluon_format
+                ag_data = convert_to_autogluon_format(self.test_data)
+                leaderboard = self.predictor.predictor.leaderboard(ag_data)
             else:
                 # Используем встроенную таблицу лидеров
                 leaderboard = self.predictor.predictor.leaderboard()
@@ -103,8 +105,8 @@ class OWAutoGluonLeaderboard(OWWidget):
                 rows.append([
                     row['model'],
                     row['score_test' if self.test_data is not None else 'score_val'],
-                    row['fit_time'],
-                    row['pred_time_val']
+                    row.get('fit_time', 0),
+                    row.get('pred_time_val', 0)
                 ])
                 
             self.model.wrap(rows)
@@ -148,8 +150,12 @@ class OWAutoGluonLeaderboard(OWWidget):
         
         if self.predictor is not None:
             # Получаем выбранную модель
-            selected_model = self.predictor.get_model(model_name)
-            self.Outputs.selected_model.send(selected_model)
+            try:
+                selected_model = self.predictor.get_model(model_name)
+                self.Outputs.selected_model.send(selected_model)
+            except:
+                self.Error.evaluation_failed(f"Could not access model {model_name}")
+                self.Outputs.selected_model.send(None)
             
 
 if __name__ == "__main__":

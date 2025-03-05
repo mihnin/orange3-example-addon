@@ -103,9 +103,13 @@ class OWAutoGluonFeatureImportance(OWScatterPlotBase):
         self.Error.clear()
         
         try:
+            # Преобразуем данные в формат AutoGluon
+            from orangecontrib.example.autogluon_integration import convert_to_autogluon_format
+            ag_data = convert_to_autogluon_format(self.data)
+            
             # Вычисляем важность признаков
-            importance = self.predictor.feature_importance(
-                data=self.data,
+            importance = self.predictor.predictor.feature_importance(
+                data=ag_data,
                 method=self.method,
                 num_iterations=self.num_iterations,
                 subsample_size=self.subsample_size,
@@ -140,8 +144,9 @@ class OWAutoGluonFeatureImportance(OWScatterPlotBase):
         if self.importance_data is None:
             return
             
-        # Использует функциональность OWScatterPlotBase для отображения графика
-        # ...
+        # Заглушка для метода update_graph
+        # В реальном коде здесь должна быть логика для обновления графика
+        pass
         
     def selection_changed(self):
         """
@@ -151,7 +156,9 @@ class OWAutoGluonFeatureImportance(OWScatterPlotBase):
             return
             
         # Получаем выбранные признаки и отправляем их на выход
-        # ...
+        # Заглушка для метода selection_changed
+        # В реальном коде здесь должна быть логика обработки выбора
+        pass
         
 if __name__ == "__main__":
     from orangewidget.utils.widgetpreview import WidgetPreview

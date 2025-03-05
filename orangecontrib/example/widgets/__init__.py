@@ -27,3 +27,9 @@ WIDGET_HELP_PATH = (
     # performed by comparing link caption to widget name.
     ("http://orange3-example-addon.readthedocs.io/en/latest/", "")
 )
+
+# Импорт всех виджетов для правильной регистрации
+from orangecontrib.example.widgets.mywidget import MyWidget
+from orangecontrib.example.widgets.owautogluonleaderboard import OWAutoGluonLeaderboard
+from orangecontrib.example.widgets.owautogluonforecast import OWAutoGluonForecast
+from orangecontrib.example.widgets.owautogluonfeatureimportance import OWAutoGluonFeatureImportance

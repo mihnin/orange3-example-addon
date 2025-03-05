@@ -5,7 +5,7 @@ from Orange.widgets import widget, gui, settings
 from Orange.widgets.widget import Input, Output, Msg
 
 from orangecontrib.timeseries import Timeseries
-from orangecontrib.timeseries.autogluon_integration import AutoGluonWrapper, convert_to_autogluon_format
+from orangecontrib.example.autogluon_integration import AutoGluonWrapper, convert_to_autogluon_format
 
 class OWAutoGluonForecast(widget.OWWidget):
     name = "AutoGluon Forecast"
@@ -76,8 +76,7 @@ class OWAutoGluonForecast(widget.OWWidget):
         )
         form.addRow("Time limit (seconds):", self.time_spin)
         
-        self.autocommit = False
-        gui.auto_commit(self.controlArea, self, "autocommit", "Apply", box=False)
+        self.autocommit_checkbox = gui.auto_commit(self.controlArea, self, "autocommit", "Apply", box=False)
         
     @Inputs.time_series
     def set_data(self, data):
@@ -115,9 +114,10 @@ class OWAutoGluonForecast(widget.OWWidget):
             # Создаем и обучаем модель
             self.predictor = AutoGluonWrapper(
                 prediction_length=self.prediction_length,
-                target=self.data.domain.class_var.name,
                 eval_metric=self.eval_metric,
-                path="autogluon-timeseries-model"
+                path="autogluon-timeseries-model",
+                presets=self.preset,
+                time_limit=self.time_limit
             )
             
             with self.progressBar(1) as progress:
@@ -146,23 +146,36 @@ class OWAutoGluonForecast(widget.OWWidget):
         
         try:
             # Создаем и обучаем модель прогнозирования
-            self.forecaster = AutoGluonForecaster(
-                prediction_interval=self.prediction_interval
+            self.predictor = AutoGluonWrapper(
+                prediction_length=self.prediction_length,
+                eval_metric=self.eval_metric,
+                path="autogluon-timeseries-model",
+                presets=self.preset,
+                time_limit=self.time_limit
             )
-            self.forecaster.fit(self.data)
+            
+            self.predictor.fit(self.data)
             
             # Делаем прогноз
-            forecast_data = self.forecaster.predict(steps=self.forecast_steps)
+            forecast_data = self.predictor.predict(self.data)
             
             # Отправляем результат
             self.Outputs.forecast.send(forecast_data)
-        
+            self.Outputs.predictor.send(self.predictor)
+            
+            # Получаем fitted values
+            fitted_values = self.predictor.get_fitted_values(self.data)
+            self.Outputs.fitted_values.send(fitted_values)
+            
         except Exception as e:
-            self.error(str(e))
+            self.Error.fitting_failed(str(e))
             self.Outputs.forecast.send(None)
+            self.Outputs.predictor.send(None)
+            self.Outputs.fitted_values.send(None)
 
 
 if __name__ == "__main__":
     from orangewidget.utils.widgetpreview import WidgetPreview
+    from Orange.widgets.utils.owbasespinbox import DoubleSpinBox
     data = Timeseries.from_file('airpassengers')
     WidgetPreview(OWAutoGluonForecast).run(set_data=data)
