@@ -1,0 +1,3 @@
+Orange3
+PyQt5>=5.12.0
+orangecontrib.timeseries
