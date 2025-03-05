@@ -3,12 +3,12 @@ from AnyQt.QtWidgets import QTableView, QHeaderView
 
 from Orange.data import Table, Domain, ContinuousVariable, StringVariable
 from Orange.widgets import gui, settings
-from Orange.widgets.widget import Input, Output, Msg
+from Orange.widgets.widget import Input, Output, Msg, OWWidget
 from Orange.widgets.utils.itemmodels import PyTableModel
 
 from orangecontrib.timeseries import Timeseries
 
-class OWAutoGluonLeaderboard(gui.OWComponent, QTableView):
+class OWAutoGluonLeaderboard(OWWidget):
     name = "AutoGluon Leaderboard"
     description = "Display model leaderboard for AutoGluon TimeSeries"
     icon = "icons/AutoGluonLeaderboard.svg"
@@ -22,7 +22,7 @@ class OWAutoGluonLeaderboard(gui.OWComponent, QTableView):
         selected_model = Output("Selected model", object)
         evaluation_results = Output("Evaluation results", Table)
         
-    class Error(gui.OWWidget.Error):
+    class Error(OWWidget.Error):
         invalid_predictor = Msg("Input is not a valid AutoGluon predictor")
         evaluation_failed = Msg("Evaluation failed: {}")
     
@@ -35,16 +35,22 @@ class OWAutoGluonLeaderboard(gui.OWComponent, QTableView):
         
         self.predictor = None
         self.test_data = None
-        self.model = PyTableModel(parent=self)
+        
+        # Создаем таблицу
+        self.table = QTableView()
+        self.model = PyTableModel(parent=self.table)
         
         self.model.setHorizontalHeaderLabels(["Model", "Score", "Fit Time", "Inference Time"])
         
-        self.setModel(self.model)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.horizontalHeader().sectionClicked.connect(self.sort_by_column)
-        self.setSelectionBehavior(QTableView.SelectRows)
-        self.setSelectionMode(QTableView.SingleSelection)
-        self.selectionModel().selectionChanged.connect(self.selection_changed)
+        self.table.setModel(self.model)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.horizontalHeader().sectionClicked.connect(self.sort_by_column)
+        self.table.setSelectionBehavior(QTableView.SelectRows)
+        self.table.setSelectionMode(QTableView.SingleSelection)
+        self.table.selectionModel().selectionChanged.connect(self.selection_changed)
+        
+        # Добавляем таблицу в главную область виджета
+        self.mainArea.layout().addWidget(self.table)
         
     @Inputs.predictor
     def set_predictor(self, predictor):
@@ -132,7 +138,7 @@ class OWAutoGluonLeaderboard(gui.OWComponent, QTableView):
         self.model.sort(column, order)
         
     def selection_changed(self):
-        indexes = self.selectionModel().selectedRows()
+        indexes = self.table.selectionModel().selectedRows()
         if not indexes:
             self.Outputs.selected_model.send(None)
             return
