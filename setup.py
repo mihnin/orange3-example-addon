@@ -38,6 +38,7 @@ DATA_FILES = [
 
 INSTALL_REQUIRES = [
     'Orange3',
+    'autogluon.timeseries',
 ]
 
 ENTRY_POINTS = {
