@@ -15,11 +15,11 @@ class OWAutoGluonLeaderboard(OWWidget):
     priority = 210
     
     class Inputs:
-        predictor = Input("Predictor", object)
+        predictor = Input("Predictor", object, auto_summary=False)
         time_series = Input("Time series", Timeseries)
         
     class Outputs:
-        selected_model = Output("Selected model", object)
+        selected_model = Output("Selected model", object, auto_summary=False)
         evaluation_results = Output("Evaluation results", Table)
         
     class Error(OWWidget.Error):

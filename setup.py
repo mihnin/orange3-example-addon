@@ -109,3 +109,10 @@ if __name__ == '__main__':
         namespace_packages=NAMESPACE_PACKAGES,
         zip_safe=False,
     )
+
+# Create a pyproject.toml file in the root of the project with the following content:
+"""
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+"""

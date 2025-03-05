@@ -18,7 +18,7 @@ class OWAutoGluonForecast(widget.OWWidget):
         
     class Outputs:
         forecast = Output("Forecast", Timeseries)
-        predictor = Output("Predictor", object)
+        predictor = Output("Predictor", object, auto_summary=False)
         fitted_values = Output("Fitted values", Timeseries)
     
     class Error(widget.OWWidget.Error):
